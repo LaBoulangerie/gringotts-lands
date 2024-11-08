@@ -1,0 +1,6 @@
+name: gringotts-lands
+version: ${project.version}
+main: net.laboulangerie.gringottslands.GringottsLands
+api-version: 1.19
+authors: ["Clem", "Grooble"]
+depend: [Lands, Gringotts]

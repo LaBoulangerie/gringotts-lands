@@ -1,0 +1,6 @@
+name: gringotts-lands
+version: 1.0-SNAPSHOT
+main: net.laboulangerie.gringottslands.GringottsLands
+api-version: 1.19
+authors: ["Clem", "Grooble"]
+depend: [Lands, Gringotts]
