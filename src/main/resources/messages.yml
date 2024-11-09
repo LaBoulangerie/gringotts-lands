@@ -1,0 +1,5 @@
+noLandVaultPerm: "You do not have permission to create town vaults here."
+noLandResident: "Cannot create town vault: You are not resident of a town."
+noNationVaultPerm: "You do not have permission to create nation vaults here."
+notInNation: "Cannot create nation vault: You do not belong to a nation."
+vaultNotInLand: "You cannot create vaults outside of towns."
