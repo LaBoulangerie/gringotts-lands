@@ -65,4 +65,9 @@ public class LandAccountHolder implements AccountHolder {
     public Land getLand() {
         return this.land;
     }
+
+    @Override
+    public boolean hasPermission(String arg0) {
+        return false;
+    }
 }

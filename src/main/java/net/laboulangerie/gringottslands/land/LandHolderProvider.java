@@ -6,15 +6,18 @@ import me.angeschossen.lands.api.events.LandRenameEvent;
 import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.memberholder.MemberHolder;
 import me.angeschossen.lands.api.player.LandPlayer;
+import net.laboulangerie.gringottslands.LandsConfiguration;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.gestern.gringotts.AccountChest;
+import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
+import org.gestern.gringotts.event.CalculateStartBalanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +40,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      * @return account holder for id
      */
     public @Nullable AccountHolder getAccountHolder(@NotNull ULID ulid) {
+        System.out.println("LandHolderProvider.getAccountHolder ULID " + ulid);
         Land land = this.api.getLandByULID(ulid);
 
         return getAccountHolder(land);
@@ -50,6 +54,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull String id) {
+        System.out.println("LandHolderProvider.getAccountHolder String " + id);
         try {
             ULID targetUlid = ULID.fromString(id);
 
@@ -70,6 +75,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull UUID uuid) {
+        System.out.println("LandHolderProvider.getAccountHolder UUID " + uuid);
         return null;
     }
 
@@ -82,6 +88,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull OfflinePlayer player) {
+        System.out.println("LandHolderProvider.getAccountHolder OfflinePlayer " + player);
         LandPlayer resident = this.api.getLandPlayer(player.getUniqueId());
         if (resident == null) return null;
 
@@ -154,12 +161,12 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      *
      * @param event the event
      */
-    // @EventHandler
-    // public void calculateStartBalance(CalculateStartBalanceEvent event) {
-    //     if (!event.holder.getType().equals(getType())) {
-    //         return;
-    //     }
+    @EventHandler
+    public void calculateStartBalance(CalculateStartBalanceEvent event) {
+        if (!event.holder.getType().equals(getType())) {
+            return;
+        }
 
-    //     event.startValue = Configuration.CONF.getCurrency().getCentValue(LandsConfiguration.CONF.townStartBalance);
-    // }
+        event.startValue = Configuration.CONF.getCurrency().getCentValue(LandsConfiguration.CONF.landStartBalance);
+    }
 }
