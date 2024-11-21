@@ -46,9 +46,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.nikosgram</groupId>
-            <artifactId>gringotts</artifactId>
-            <version>2.12.3</version>
+            <groupId>com.github.LaBoulangerie</groupId>
+            <artifactId>Gringotts</artifactId>
+            <version>dev-2b46a143f4-1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
