@@ -12,14 +12,10 @@ import org.gestern.gringotts.event.PlayerVaultCreationEvent;
 
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.land.Land;
-import me.angeschossen.lands.api.nation.Nation;
 import net.laboulangerie.gringottslands.land.LandAccountHolder;
 import net.laboulangerie.gringottslands.land.LandHolderProvider;
-import net.laboulangerie.gringottslands.nation.NationAccountHolder;
-import net.laboulangerie.gringottslands.nation.NationHolderProvider;
 
 public class LandsDependency implements Dependency, Listener {
-    private final NationHolderProvider nationHolderProvider;
     private final LandHolderProvider landHolderProvider;
     private final Gringotts gringotts;
     private final Plugin plugin;
@@ -42,7 +38,6 @@ public class LandsDependency implements Dependency, Listener {
         this.id = "lands";
 
         this.api = LandsIntegration.of(plugin);
-        this.nationHolderProvider = new NationHolderProvider(this.api);
         this.landHolderProvider = new LandHolderProvider(this.api);
         
     }
@@ -74,10 +69,8 @@ public class LandsDependency implements Dependency, Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, this.gringotts);
         Bukkit.getPluginManager().registerEvents(this.landHolderProvider, this.gringotts);
-        Bukkit.getPluginManager().registerEvents(this.nationHolderProvider, this.gringotts);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
-        Gringotts.instance.registerAccountHolderProvider(NationAccountHolder.ACCOUNT_TYPE, this.nationHolderProvider);
     }
 
     /**
@@ -117,21 +110,6 @@ public class LandsDependency implements Dependency, Listener {
             }
 
             owner = this.landHolderProvider.getAccountHolder(land);
-        } else if (event.getType().equals(LandsConfiguration.CONF.nationSignTypeName)) {
-            if (!LandsPermissions.CREATE_VAULT_NATION.isAllowed(player)) {
-                player.sendMessage(LandsLanguage.LANG.noNationVaultPerm);
-
-                return;
-            }
-
-            Nation nation = this.api.getNationByName(line2String);
-            if (nation == null) {
-                // TODO: no nation found
-                // player.sendMessage(LandsLanguage.LANG.notInNation);
-                return;
-            }
-
-            owner = this.nationHolderProvider.getAccountHolder(nation);
         } else {
             return;
         }
