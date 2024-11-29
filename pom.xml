@@ -46,9 +46,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.LaBoulangerie</groupId>
-            <artifactId>Gringotts</artifactId>
-            <version>dev-SNAPSHOT</version>
+            <groupId>minecraftwars</groupId>
+            <artifactId>gringotts</artifactId>
+            <version>3.0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

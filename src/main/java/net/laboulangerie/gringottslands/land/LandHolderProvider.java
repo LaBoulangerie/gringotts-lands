@@ -17,6 +17,7 @@ import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
+import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 import org.gestern.gringotts.event.CalculateStartBalanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -89,12 +90,6 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull OfflinePlayer player) {
         System.out.println("LandHolderProvider.getAccountHolder OfflinePlayer " + player);
-        LandPlayer resident = this.api.getLandPlayer(player.getUniqueId());
-        if (resident == null) return null;
-
-
-        // resident.getLands().stream().f
-
         return null;
     }
 
@@ -168,5 +163,19 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
         }
 
         event.startValue = Configuration.CONF.getCurrency().getCentValue(LandsConfiguration.CONF.landStartBalance);
+    }
+
+    /**
+     * Calculate start balance.
+     *
+     * @param event the event
+     */
+    @EventHandler
+    public void onBalanceChange(AccountBalanceChangeEvent event) {
+        if (!event.holder.getType().equals(this.getType())) return;
+        LandAccountHolder lHolder = (LandAccountHolder) this.getAccountHolder(event.holder.getId());
+        double update = event.balance - lHolder.getLand().getBalance();
+        System.out.println("Balance change detected for " + lHolder.getId() + " " + update);
+        lHolder.getLand().modifyBalance(update);
     }
 }
