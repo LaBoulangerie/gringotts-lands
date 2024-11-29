@@ -2,21 +2,27 @@ package net.laboulangerie.gringottslands.land;
 
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.applicationframework.util.ULID;
+import me.angeschossen.lands.api.events.LandCreateEvent;
 import me.angeschossen.lands.api.events.LandRenameEvent;
+import me.angeschossen.lands.api.events.land.bank.LandBankBalanceChangedEvent;
+import me.angeschossen.lands.api.events.land.bank.LandBankDepositEvent;
+import me.angeschossen.lands.api.events.land.bank.LandBankWithdrawEvent;
 import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.memberholder.MemberHolder;
-import me.angeschossen.lands.api.player.LandPlayer;
 import net.laboulangerie.gringottslands.LandsConfiguration;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.AccountChest;
 import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
+import org.gestern.gringotts.api.Account;
+import org.gestern.gringotts.api.TransactionResult;
 import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 import org.gestern.gringotts.event.CalculateStartBalanceEvent;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +35,11 @@ import java.util.stream.Collectors;
 public class LandHolderProvider implements AccountHolderProvider, Listener {
 
     private LandsIntegration api;
+    private Gringotts gringotts;
     
-    public LandHolderProvider(LandsIntegration api) {
+    public LandHolderProvider(LandsIntegration api, Gringotts gringotts) {
         this.api = api;
+        this.gringotts = gringotts;
     }
 
     /**
@@ -41,9 +49,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      * @return account holder for id
      */
     public @Nullable AccountHolder getAccountHolder(@NotNull ULID ulid) {
-        System.out.println("LandHolderProvider.getAccountHolder ULID " + ulid);
         Land land = this.api.getLandByULID(ulid);
-
         return getAccountHolder(land);
     }
 
@@ -55,17 +61,11 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull String id) {
-        System.out.println("LandHolderProvider.getAccountHolder String " + id);
         try {
-            ULID targetUlid = ULID.fromString(id);
-
-            return getAccountHolder(targetUlid);
-        } catch (IllegalArgumentException ignored) {}
-
-        String vaultPrefix = LandAccountHolder.ACCOUNT_TYPE + "-";
-        String validId = id.startsWith(vaultPrefix) ? id.substring(vaultPrefix.length()) : id;
-
-        return getAccountHolder(ULID.fromString(validId));
+            return getAccountHolder(ULID.fromString(id));
+        } catch(IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**
@@ -76,8 +76,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull UUID uuid) {
-        System.out.println("LandHolderProvider.getAccountHolder UUID " + uuid);
-        return null;
+        throw new UnsupportedOperationException("Unimplemented method 'getAccountHolder'");
     }
 
     /**
@@ -89,8 +88,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull OfflinePlayer player) {
-        System.out.println("LandHolderProvider.getAccountHolder OfflinePlayer " + player);
-        return null;
+        throw new UnsupportedOperationException("Unimplemented method 'getAccountHolder'");
     }
 
     /**
@@ -128,7 +126,30 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
     }
 
     /**
-     * Rename town.
+     * Create land.
+     *
+     * @param event the event
+     */
+    @EventHandler
+    public void createLand(LandCreateEvent event) {
+        Land land = event.getLand();
+        AccountHolder holder = getAccountHolder(land);
+
+        if (holder == null) {
+            return;
+        }
+
+        GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+
+        if (account == null) {
+            return;
+        }
+
+        Gringotts.instance.getDao().retrieveChests(account).forEach(AccountChest::updateSign);
+    }
+
+    /**
+     * Rename land.
      *
      * @param event the event
      */
@@ -165,17 +186,84 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
         event.startValue = Configuration.CONF.getCurrency().getCentValue(LandsConfiguration.CONF.landStartBalance);
     }
 
-    /**
-     * Calculate start balance.
-     *
-     * @param event the event
-     */
+    // @EventHandler
+    // public void onBalanceChange(AccountBalanceChangeEvent event) {
+    //     if (!event.holder.getType().equals(this.getType())) return;
+    //     double balance = Configuration.CONF.getCurrency().getDisplayValue(event.balance);
+    //     LandAccountHolder lHolder = (LandAccountHolder) this.getAccountHolder(event.holder.getId());
+    //     Account acc = Gringotts.instance.getEco().account(event.holder.getId());
+    //     if (lHolder.getLand().getBalance() == acc.balance()) return;
+    //     System.out.println("Land Balance before change " + lHolder.getId() + " " + lHolder.getLand().getBalance());
+    //     System.out.println("Balance change detected for " + lHolder.getId() + " " + balance);
+    //     lHolder.getLand().setBalance(balance);
+    // }
+
     @EventHandler
-    public void onBalanceChange(AccountBalanceChangeEvent event) {
-        if (!event.holder.getType().equals(this.getType())) return;
-        LandAccountHolder lHolder = (LandAccountHolder) this.getAccountHolder(event.holder.getId());
-        double update = event.balance - lHolder.getLand().getBalance();
-        System.out.println("Balance change detected for " + lHolder.getId() + " " + update);
-        lHolder.getLand().modifyBalance(update);
+    public void onLandBankBalanceChanged(LandBankBalanceChangedEvent event) {
+        if (event.getEventName().equals(LandBankDepositEvent.class.getSimpleName())) return;
+        if (event.getEventName().equals(LandBankWithdrawEvent.class.getSimpleName())) return;
+
+        Land land = event.getLand();
+
+        AccountHolder holder = getAccountHolder(land);
+
+        if (holder == null) {
+            return;
+        }
+
+        GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+        if (account.getBalance() != event.getNow()) {
+            System.out.println("Land Balance change detected for " + land.getULID() + " from " + event.getPrevious() + " to " + event.getNow());
+            long update = Configuration.CONF.getCurrency().getCentValue(event.getNow() - event.getPrevious());
+            TransactionResult result;
+            if (update > 0) {
+                result = account.add(update);
+            } else {
+                result = account.remove(Math.abs(update));
+            }
+
+            if (result != TransactionResult.SUCCESS) {
+                throw new IllegalStateException(account.owner.getId() + " account transaction error for " + (event.getNow() - event.getPrevious()) + " " + result);
+            }
+        }
     }
+
+    @EventHandler
+    public void onLandBankDeposit(LandBankDepositEvent event) {
+        Land land = event.getLand();
+
+        AccountHolder holder = getAccountHolder(land);
+
+        if (holder == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+        System.out.println("Land deposit on " + land.getULID() + " of " + event.getValue());
+        long value = Configuration.CONF.getCurrency().getCentValue(event.getValue());
+        if (account.add(value) != TransactionResult.SUCCESS) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onLandBankWithdraw(LandBankWithdrawEvent event) {
+        Land land = event.getLand();
+
+        AccountHolder holder = getAccountHolder(land);
+
+        if (holder == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+        System.out.println("Land withdraw on " + land.getULID() + " of " + event.getValue());
+        long value = Configuration.CONF.getCurrency().getCentValue(event.getValue());
+        if (account.remove(value) != TransactionResult.SUCCESS) {
+            event.setCancelled(true);
+        }
+    }
+    
 }

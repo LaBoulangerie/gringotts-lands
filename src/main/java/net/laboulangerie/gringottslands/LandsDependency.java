@@ -38,7 +38,7 @@ public class LandsDependency implements Dependency, Listener {
         this.id = "lands";
 
         this.api = LandsIntegration.of(plugin);
-        this.landHolderProvider = new LandHolderProvider(this.api);
+        this.landHolderProvider = new LandHolderProvider(this.api, this.gringotts);
         
     }
 
