@@ -38,7 +38,7 @@ public class LandsDependency implements Dependency, Listener {
         this.id = "lands";
 
         this.api = LandsIntegration.of(plugin);
-        this.landHolderProvider = new LandHolderProvider(this.api);
+        this.landHolderProvider = new LandHolderProvider(this.gringotts, this.api);
         
     }
 
@@ -104,8 +104,7 @@ public class LandsDependency implements Dependency, Listener {
 
             Land land = this.api.getLandByName(line2String);
             if (land == null) {
-                // TODO: no land found
-                // player.sendMessage(LandsLanguage.LANG.noLandResident);
+                player.sendMessage(LandsLanguage.LANG.noLandFound);
                 return;
             }
 

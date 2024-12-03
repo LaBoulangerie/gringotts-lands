@@ -1,4 +1,3 @@
 noLandVaultPerm: "Vous n'avez pas la permission de créer un coffre-fort de ville ici."
-noLandResident: "Impossible de créer un coffre-fort de ville : Vous n'êtes pas résident d'une ville."
+noLandFound: "Impossible de créer un coffre-fort de ville : La ville spécifiée n'existe pas."
 vaultNotInLand: "Vous ne pouvez pas créer de coffre-fort en dehors des villes."
-tooManyVaults: "Vous ne pouvez pas créer plus de coffre-fort ! Max : %max"

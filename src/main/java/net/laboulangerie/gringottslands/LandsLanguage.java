@@ -10,7 +10,7 @@ public enum LandsLanguage {
         LANG;
 
         public String noLandVaultPerm;
-        public String noLandResident;
+        public String noLandFound;
         public String vaultNotInLand;
 
         public void readLanguage(FileConfiguration savedLanguage) {
@@ -19,8 +19,8 @@ public enum LandsLanguage {
 
                 LANG.noLandVaultPerm = translator.apply("noLandPerm",
                                 "You do not have permission to create land vaults here.");
-                LANG.noLandResident = translator.apply("noLandResident",
-                                "Cannot create land vault: You are not resident of a land.");
+                LANG.noLandFound = translator.apply("noLandFound",
+                                "Cannot create land vault: Land not found.");
                 LANG.vaultNotInLand = translator.apply("vaultNotInLand", "You cannot create vaults outside of lands.");
 
         }

@@ -1,3 +1,3 @@
-noLandVaultPerm: "You do not have permission to create town vaults here."
-noLandResident: "Cannot create town vault: You are not resident of a town."
-vaultNotInLand: "You cannot create vaults outside of towns."
+noLandVaultPerm: "You do not have permission to create land vaults here."
+noLandFound: "Cannot create land vault: Land not found."
+vaultNotInLand: "You cannot create vaults outside of lands."
