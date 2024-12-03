@@ -14,16 +14,13 @@ import net.laboulangerie.gringottslands.LandsConfiguration;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.gestern.gringotts.AccountChest;
 import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
-import org.gestern.gringotts.api.Account;
 import org.gestern.gringotts.api.TransactionResult;
-import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 import org.gestern.gringotts.event.CalculateStartBalanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,11 +32,9 @@ import java.util.stream.Collectors;
 public class LandHolderProvider implements AccountHolderProvider, Listener {
 
     private LandsIntegration api;
-    private Gringotts gringotts;
     
-    public LandHolderProvider(LandsIntegration api, Gringotts gringotts) {
+    public LandHolderProvider(LandsIntegration api) {
         this.api = api;
-        this.gringotts = gringotts;
     }
 
     /**
@@ -82,7 +77,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
     /**
      * Get a AccountHolder for the land of which player is a resident, if any.
      *
-     * @param player player to get town for
+     * @param player player to get land for
      * @return AccountHolder for the land of which player is a resident, if
      * any. null otherwise.
      */
@@ -114,7 +109,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
     /**
      * Gets account holder.
      *
-     * @param town the town
+     * @param Land the land
      * @return the account holder
      */
     public @Nullable AccountHolder getAccountHolder(@Nullable Land land) {

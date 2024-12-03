@@ -14,7 +14,6 @@ public enum LandsConfiguration {
 
     public boolean vaultsOnlyInLands  = false;
     public long    landStartBalance   = 0;
-    public long    nationStartBalance = 0;
 
     public void readConfig(FileConfiguration savedConfig) {
         CONF.language           = savedConfig.getString("language", "custom");

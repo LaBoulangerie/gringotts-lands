@@ -9,11 +9,7 @@ public enum LandsPermissions {
     /**
      * Create vault land permissions.
      */
-    CREATE_VAULT_LAND("gringotts.createvault.land"),
-    /**
-     * Create vault nation permissions.
-     */
-    CREATE_VAULT_NATION("gringotts.createvault.nation");
+    CREATE_VAULT_LAND("gringotts.createvault.land");
 
     /**
      * The Node.

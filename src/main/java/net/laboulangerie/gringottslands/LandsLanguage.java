@@ -11,8 +11,6 @@ public enum LandsLanguage {
 
         public String noLandVaultPerm;
         public String noLandResident;
-        public String noNationVaultPerm;
-        public String notInNation;
         public String vaultNotInLand;
 
         public void readLanguage(FileConfiguration savedLanguage) {
@@ -23,10 +21,6 @@ public enum LandsLanguage {
                                 "You do not have permission to create land vaults here.");
                 LANG.noLandResident = translator.apply("noLandResident",
                                 "Cannot create land vault: You are not resident of a land.");
-                LANG.noNationVaultPerm = translator.apply("NoNationVaultPerm",
-                                "You do not have permission to create nation vaults here.");
-                LANG.notInNation = translator.apply("notInNation",
-                                "Cannot create nation vault: You do not belong to a nation.");
                 LANG.vaultNotInLand = translator.apply("vaultNotInLand", "You cannot create vaults outside of lands.");
 
         }

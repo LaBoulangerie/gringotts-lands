@@ -59,8 +59,8 @@ public class LandAccountHolder implements AccountHolder {
     }
 
     /**
-     * The town onwing this account
-     * @return town object
+     * The land onwing this account
+     * @return land object
      */
     public Land getLand() {
         return this.land;
