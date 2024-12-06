@@ -12,9 +12,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
 
 public class GringottsLands extends JavaPlugin {
     private static final String MESSAGES_YML = "messages.yml";
+    public static Logger LOGGER;
 
     @Override
     public void onLoad() {
@@ -33,6 +35,8 @@ public class GringottsLands extends JavaPlugin {
         // load and init configuration
         saveDefaultConfig(); // saves default configuration if no config.yml exists yet
         reloadConfig();
+
+        LOGGER = this.getLogger();
 
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }

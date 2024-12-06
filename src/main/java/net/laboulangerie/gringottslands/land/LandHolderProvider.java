@@ -5,10 +5,9 @@ import me.angeschossen.lands.api.applicationframework.util.ULID;
 import me.angeschossen.lands.api.events.LandDeleteEvent;
 import me.angeschossen.lands.api.events.LandRenameEvent;
 import me.angeschossen.lands.api.events.land.bank.LandBankBalanceChangedEvent;
-import me.angeschossen.lands.api.events.land.bank.LandBankDepositEvent;
-import me.angeschossen.lands.api.events.land.bank.LandBankWithdrawEvent;
 import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.memberholder.MemberHolder;
+import net.laboulangerie.gringottslands.GringottsLands;
 import net.laboulangerie.gringottslands.LandsConfiguration;
 
 import org.bukkit.OfflinePlayer;
@@ -198,25 +197,16 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
             return;
         }
 
-        System.out.println("Balance change detected for " + holder.getId() + " " + balance);
-
         if (holder.getLand().getBalance() == balance)
             return;
-        System.out.println("Land Balance before change " + holder.getId() + " " + holder.getLand().getBalance());
+
+        GringottsLands.LOGGER.fine("Replicate Gringotts account balance change detected on Land " + holder.getId() + " - " + balance);
 
         holder.getLand().setBalance(balance);
     }
 
     @EventHandler
     public void onLandBankBalanceChanged(LandBankBalanceChangedEvent event) {
-        System.out.println("onLandBankBalanceChanged " + event.getEventName());
-        System.out.println("onLandBankBalanceChanged " + event.getClass());
-        if (event.getEventName().equals(LandBankDepositEvent.class.getSimpleName()))
-            return; // TODO: to fix
-        if (event.getEventName().equals(LandBankWithdrawEvent.class.getSimpleName()))
-            return; // TODO: to fix
-        // land event duplication
-
         Land land = event.getLand();
 
         AccountHolder holder = getAccountHolder(land);
@@ -227,8 +217,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
 
         GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
         if (account.getBalance() != event.getNow()) {
-            System.out.println("Land Balance change detected for " + land.getULID() + " from " + event.getPrevious()
-                    + " to " + event.getNow());
+            GringottsLands.LOGGER.fine("Replicate Land Balance change (from " + event.getPrevious() + " to " + event.getNow() + ") on account " + land.getULID());
             long update = Configuration.CONF.getCurrency().getCentValue(event.getNow() - event.getPrevious());
             TransactionResult result;
             if (update > 0) {
