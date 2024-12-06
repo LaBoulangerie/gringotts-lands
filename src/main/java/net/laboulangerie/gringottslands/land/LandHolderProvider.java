@@ -5,6 +5,7 @@ import me.angeschossen.lands.api.applicationframework.util.ULID;
 import me.angeschossen.lands.api.events.LandDeleteEvent;
 import me.angeschossen.lands.api.events.LandRenameEvent;
 import me.angeschossen.lands.api.events.land.bank.LandBankBalanceChangedEvent;
+import me.angeschossen.lands.api.events.land.bank.LandBankWithdrawEvent;
 import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.memberholder.MemberHolder;
 import net.laboulangerie.gringottslands.GringottsLands;
@@ -20,6 +21,7 @@ import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
+import org.gestern.gringotts.api.Account;
 import org.gestern.gringotts.api.TransactionResult;
 import org.gestern.gringotts.event.AccountBalanceChangeEvent;
 import org.gestern.gringotts.event.CalculateStartBalanceEvent;
@@ -230,6 +232,23 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
                 throw new IllegalStateException(account.owner.getId() + " account transaction error for "
                         + (event.getNow() - event.getPrevious()) + " " + result);
             }
+        }
+    }
+
+    @EventHandler
+    public void onLandBankWithdraw(LandBankWithdrawEvent event) {
+        Land land = event.getLand();
+
+        AccountHolder holder = getAccountHolder(land);
+
+        if (holder == null) {
+            return;
+        }
+
+        Account account = Gringotts.instance.getEco().getAccount(holder.getId());
+        long value = Configuration.CONF.getCurrency().getCentValue(event.getValue());
+        if (!account.has(value)) {
+            event.setCancelled(true);
         }
     }
 
