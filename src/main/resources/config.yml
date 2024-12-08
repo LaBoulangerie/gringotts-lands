@@ -10,3 +10,6 @@ vaults_only_in_lands: false
 
 # balance to start an account with (purely virtual)
 land_start_balance: 0
+
+# Plugin debug
+debug: false

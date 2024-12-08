@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
+import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.api.dependency.Dependency;
 import org.gestern.gringotts.event.PlayerVaultCreationEvent;
@@ -71,6 +73,21 @@ public class LandsDependency implements Dependency, Listener {
         Bukkit.getPluginManager().registerEvents(this.landHolderProvider, this.gringotts);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
+    }
+
+    public void checkLandBalanceConsistency() {
+        // Check gringotts/lands balance consistency
+        for (Land land : this.api.getLands()) {
+            GringottsLands.LOGGER.fine("Check Land " + land.getULID() + " balance consistency.");
+            AccountHolder holder = this.landHolderProvider.getAccountHolder(land);
+            GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+            double landBalance = land.getBalance();
+            double balance = Configuration.CONF.getCurrency().getDisplayValue(account.getBalance());
+            if (landBalance != balance) {
+                GringottsLands.LOGGER.severe("Update Land " + land.getULID() + " balance to resolve inconsistency. (current: " + landBalance + " gringotts: " + balance + ")" );
+                land.setBalance(balance);
+            }
+        }
     }
 
     /**

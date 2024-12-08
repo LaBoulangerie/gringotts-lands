@@ -12,11 +12,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GringottsLands extends JavaPlugin {
     private static final String MESSAGES_YML = "messages.yml";
     public static Logger LOGGER;
+
+    private LandsDependency landsDependency;
 
     @Override
     public void onLoad() {
@@ -24,12 +27,16 @@ public class GringottsLands extends JavaPlugin {
             Plugin plugin = Gringotts.instance.getDependencies()
                     .hookPlugin("Lands", "me.angeschossen.lands.Lands", "7.9.5");
 
+            this.landsDependency = new LandsDependency(Gringotts.instance, plugin);
+            
             if (plugin != null && Gringotts.instance.getDependencies()
-                    .registerDependency(new LandsDependency(Gringotts.instance, plugin))) {
+                    .registerDependency(this.landsDependency)) {
                 getLogger().warning("Lands plugin is already assigned into the dependencies.");
             }
         } catch (IllegalArgumentException e) {
             getLogger().warning("Looks like Lands plugin is not compatible with Gringotts");
+            this.onDisable();
+            return;
         }
 
         // load and init configuration
@@ -37,18 +44,16 @@ public class GringottsLands extends JavaPlugin {
         reloadConfig();
 
         LOGGER = this.getLogger();
+        if (LandsConfiguration.CONF.debug) {
+            LOGGER.setLevel(Level.ALL);
+        }
 
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }
 
     @Override
     public void onEnable() {
-
-    }
-
-    @Override
-    public void onDisable() {
-
+        this.landsDependency.checkLandBalanceConsistency();
     }
 
     /**
