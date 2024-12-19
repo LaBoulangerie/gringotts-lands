@@ -130,6 +130,11 @@ public class LandsDependency implements Dependency, Listener {
             return;
         }
 
+        if (LandsConfiguration.CONF.maxLandVaults != -1 && ((int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals(land.getULID().toString())).count() + 1) > LandsConfiguration.CONF.maxLandVaults) {
+            event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults);
+            return;
+        }
+
         event.setOwner(owner);
         event.setValid(true);
     }

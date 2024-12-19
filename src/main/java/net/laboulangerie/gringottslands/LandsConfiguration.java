@@ -12,6 +12,8 @@ public enum LandsConfiguration {
     public String language           = "custom";
     public String landSignTypeName   = "land";
 
+    public int     maxLandVaults      = -1;
+
     public boolean vaultsOnlyInLands  = false;
     public long    landStartBalance   = 0;
 
@@ -20,6 +22,7 @@ public enum LandsConfiguration {
     public void readConfig(FileConfiguration savedConfig) {
         CONF.language           = savedConfig.getString("language", "custom");
         CONF.landSignTypeName   = savedConfig.getString("land_sign_type_name", "land");
+        CONF.maxLandVaults      = savedConfig.getInt("max_land_vaults", -1);
         CONF.vaultsOnlyInLands  = savedConfig.getBoolean("vaults_only_in_lands", false);
         CONF.landStartBalance   = savedConfig.getLong("land_start_balance", 0);
         CONF.debug              = savedConfig.getBoolean("debug", false);
