@@ -19,28 +19,25 @@ import net.laboulangerie.gringottslands.land.LandHolderProvider;
 
 public class LandsDependency implements Dependency, Listener {
     private final LandHolderProvider landHolderProvider;
-    private final Gringotts gringotts;
-    private final Plugin plugin;
+    private final Plugin lands;
     private final String id;
     private final LandsIntegration api;
 
     /**
      * Instantiates a new Lands dependency.
      *
-     * @param gringotts the gringotts
-     * @param plugin    the plugin
+     * @param lands    the plugin
      */
-    public LandsDependency(Gringotts gringotts, Plugin plugin) {
-        if (plugin == null) {
-            throw new NullPointerException("'plugin' is null");
+    public LandsDependency(Plugin lands) {
+        if (lands == null) {
+            throw new NullPointerException("'lands' is null");
         }
 
-        this.gringotts = gringotts;
-        this.plugin = plugin;
+        this.lands = lands;
         this.id = "lands";
 
-        this.api = LandsIntegration.of(plugin);
-        this.landHolderProvider = new LandHolderProvider(this.gringotts, this.api);
+        this.api = LandsIntegration.of(lands);
+        this.landHolderProvider = new LandHolderProvider(this.api);
         
     }
 
@@ -61,7 +58,7 @@ public class LandsDependency implements Dependency, Listener {
      */
     @Override
     public Plugin getPlugin() {
-        return this.plugin;
+        return this.lands;
     }
 
     /**
@@ -69,8 +66,8 @@ public class LandsDependency implements Dependency, Listener {
      */
     @Override
     public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this, this.gringotts);
-        Bukkit.getPluginManager().registerEvents(this.landHolderProvider, this.gringotts);
+        Bukkit.getPluginManager().registerEvents(this, Gringotts.instance);
+        Bukkit.getPluginManager().registerEvents(this.landHolderProvider, Gringotts.instance);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
     }
@@ -110,29 +107,23 @@ public class LandsDependency implements Dependency, Listener {
 
         Player player = event.getCause().getPlayer();
 
-        AccountHolder owner;
+        if (!event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
+            return;
+            
+        }
 
-        if (event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
-            if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
-                player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
-
-                return;
-            }
-
-            Land land = this.api.getLandByName(line2String);
-            if (land == null) {
-                player.sendMessage(LandsLanguage.LANG.noLandFound);
-                return;
-            }
-
-            owner = this.landHolderProvider.getAccountHolder(land);
-        } else {
+        if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
+            player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
             return;
         }
 
-        if (owner == null) {
+        Land land = this.api.getLandByName(line2String);
+        if (land == null) {
+            player.sendMessage(LandsLanguage.LANG.noLandFound);
             return;
         }
+
+        AccountHolder owner = this.landHolderProvider.getAccountHolder(land);
 
         if (LandsConfiguration.CONF.vaultsOnlyInLands && this.api.getArea(event.getCause().getBlock().getLocation()) == null) {
             event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.vaultNotInLand);

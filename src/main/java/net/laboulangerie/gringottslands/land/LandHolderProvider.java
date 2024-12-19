@@ -34,11 +34,9 @@ import java.util.stream.Collectors;
 
 public class LandHolderProvider implements AccountHolderProvider, Listener {
 
-    private Gringotts gringotts;
     private LandsIntegration api;
 
-    public LandHolderProvider(Gringotts gringotts, LandsIntegration api) {
-        this.gringotts = gringotts;
+    public LandHolderProvider(LandsIntegration api) {
         this.api = api;
     }
 
@@ -147,7 +145,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
 
                 Gringotts.instance.getDao().retrieveChests(account).forEach(AccountChest::updateSign);
             }
-        }.runTask(this.gringotts);
+        }.runTask(GringottsLands.instance);
     }
 
     /**

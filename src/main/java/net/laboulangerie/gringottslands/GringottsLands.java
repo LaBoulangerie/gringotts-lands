@@ -16,20 +16,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GringottsLands extends JavaPlugin {
-    private static final String MESSAGES_YML = "messages.yml";
+
+    public static GringottsLands instance;
     public static Logger LOGGER;
 
+    private static final String MESSAGES_YML = "messages.yml";
+
     private LandsDependency landsDependency;
+
+    public GringottsLands() {
+        instance = this;
+    }
 
     @Override
     public void onLoad() {
         try {
-            Plugin plugin = Gringotts.instance.getDependencies()
+            Plugin lands = Gringotts.instance.getDependencies()
                     .hookPlugin("Lands", "me.angeschossen.lands.Lands", "7.9.5");
 
-            this.landsDependency = new LandsDependency(Gringotts.instance, plugin);
+            this.landsDependency = new LandsDependency(lands);
             
-            if (plugin != null && Gringotts.instance.getDependencies()
+            if (lands != null && Gringotts.instance.getDependencies()
                     .registerDependency(this.landsDependency)) {
                 getLogger().warning("Lands plugin is already assigned into the dependencies.");
             }
