@@ -1,0 +1,18 @@
+# supported languages: "custom" (default, english), "de" (german), "fr" (french), and "pt-BR" (brazilian portuguese).
+language: custom
+
+# changes the required sign name for the creation of land vaults
+# Example: [land vault]
+land_sign_vault_name: 'land'
+
+# Prevents players from creating a vault outside a land if set to true
+vaults_only_in_lands: false
+
+# Maximum number of vaults a town can own, set to -1 for infinite number of vaults
+max_land_vaults: -1
+
+# balance to start an account with (purely virtual)
+land_start_balance: 0
+
+# Plugin debug
+debug: false

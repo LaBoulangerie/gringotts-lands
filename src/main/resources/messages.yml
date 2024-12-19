@@ -1,0 +1,4 @@
+noLandVaultPerm: "You do not have permission to create land vaults here."
+noLandFound: "Cannot create land vault: Land not found."
+vaultNotInLand: "You cannot create vaults outside of lands."
+tooManyVaults: "You cannot create more vaults! Max: %max"
