@@ -188,10 +188,10 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @EventHandler
     public void onBalanceChange(AccountBalanceChangeEvent event) {
-        GringottsLands.LOGGER.fine(event.toString());
+        GringottsLands.debugMsg(event.toString());
 
         if (!event.holder.getType().equals(this.getType())) {
-            GringottsLands.LOGGER.fine(event + ": ignore holder type " + event.holder.getType());
+            GringottsLands.debugMsg(event + ": ignore holder type " + event.holder.getType());
             return;
         }
 
@@ -204,11 +204,11 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
         }
 
         if (holder.getLand().getBalance() == balance) {
-            GringottsLands.LOGGER.fine(event + ": ingore, gringotts account/land balance are identical.");
+            GringottsLands.debugMsg(event + ": ingore, gringotts account/land balance are identical.");
             return;
         }
 
-        GringottsLands.LOGGER.fine(event + ": replicate Gringotts account balance change on Land.");
+        GringottsLands.debugMsg(event + ": replicate Gringotts account balance change on Land.");
         holder.getLand().setBalance(balance);
     }
 
@@ -219,7 +219,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @EventHandler
     public void onLandBankBalanceChanged(LandBankBalanceChangedEvent event) {
-        GringottsLands.LOGGER.fine(LogLandBankBalanceChangedEvent(event));
+        GringottsLands.debugMsg(LogLandBankBalanceChangedEvent(event));
 
         Land land = event.getLand();
         AccountHolder holder = getAccountHolder(land);
@@ -227,18 +227,18 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
         double balance = Configuration.CONF.getCurrency().getDisplayValue(account.getBalance());
 
         if (event.getNow() == balance) {
-            GringottsLands.LOGGER.fine(LogLandBankBalanceChangedEvent(event) + ": ignore, gringotts account/land balance are identical.");
+            GringottsLands.debugMsg(LogLandBankBalanceChangedEvent(event) + ": ignore, gringotts account/land balance are identical.");
             return;
         }
             
-        GringottsLands.LOGGER.fine(LogLandBankBalanceChangedEvent(event) + ": replicate Land balance change on Gringotts account.");
+        GringottsLands.debugMsg(LogLandBankBalanceChangedEvent(event) + ": replicate Land balance change on Gringotts account.");
         long update = Configuration.CONF.getCurrency().getCentValue(event.getNow() - event.getPrevious());
         TransactionResult result;
         if (update > 0) {
-            GringottsLands.LOGGER.fine(LogLandBankBalanceChangedEvent(event) + ": add " + update + " to Gringotts account.");
+            GringottsLands.debugMsg(LogLandBankBalanceChangedEvent(event) + ": add " + update + " to Gringotts account.");
             result = account.add(update);
         } else {
-            GringottsLands.LOGGER.fine(LogLandBankBalanceChangedEvent(event) + ": remove " + update + " from Gringotts account.");
+            GringottsLands.debugMsg(LogLandBankBalanceChangedEvent(event) + ": remove " + update + " from Gringotts account.");
             result = account.remove(Math.abs(update));
         }
 
@@ -254,7 +254,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @EventHandler
     public void onLandBankWithdraw(LandBankWithdrawEvent event) {
-        GringottsLands.LOGGER.fine(event.getLogInfo());
+        GringottsLands.debugMsg(event.getLogInfo());
         event.getLandPlayer().getPlayer().sendMessage("Land withdraw not supported by Gringotts integration.");
         event.setCancelled(true);
     }
@@ -266,7 +266,7 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
      */
     @EventHandler
     public void onLandBankDeposit(LandBankDepositEvent event) {
-        GringottsLands.LOGGER.fine(event.getLogInfo());
+        GringottsLands.debugMsg(event.getLogInfo());
         event.getLandPlayer().getPlayer().sendMessage("Land deposit not supported by Gringotts integration.");
         event.setCancelled(true);
     }

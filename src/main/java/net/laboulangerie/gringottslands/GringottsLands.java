@@ -51,9 +51,7 @@ public class GringottsLands extends JavaPlugin {
         reloadConfig();
 
         LOGGER = this.getLogger();
-        if (LandsConfiguration.CONF.debug) {
-            LOGGER.setLevel(Level.ALL);
-        }
+        debugMsg("Plugin debug enabled.");
 
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }
@@ -97,5 +95,11 @@ public class GringottsLands extends JavaPlugin {
         }
 
         return conf;
+    }
+
+    public static final void debugMsg(String msg) {
+        if (LandsConfiguration.CONF.debug) {
+            LOGGER.info("DEBUG " + msg);
+        }        
     }
 }

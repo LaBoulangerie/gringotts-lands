@@ -75,7 +75,7 @@ public class LandsDependency implements Dependency, Listener {
     public void checkLandBalanceConsistency() {
         // Check gringotts/lands balance consistency
         for (Land land : this.api.getLands()) {
-            GringottsLands.LOGGER.fine("Check Land " + land.getULID() + " balance consistency.");
+            GringottsLands.debugMsg("Check Land " + land.getULID() + " balance consistency.");
             AccountHolder holder = this.landHolderProvider.getAccountHolder(land);
             GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
             double landBalance = land.getBalance();
