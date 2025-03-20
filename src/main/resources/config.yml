@@ -11,6 +11,9 @@ vaults_only_in_lands: false
 # Maximum number of vaults a town can own, set to -1 for infinite number of vaults
 max_land_vaults: -1
 
+# Number of additional vaults to the limit for nation capital
+max_capital_land_vaults_additional: 0
+
 # balance to start an account with (purely virtual)
 land_start_balance: 0
 
