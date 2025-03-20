@@ -1,9 +1,11 @@
 package net.laboulangerie.gringottslands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.gestern.gringotts.Configuration;
 import org.gestern.gringotts.Gringotts;
@@ -13,6 +15,11 @@ import org.gestern.gringotts.api.dependency.Dependency;
 import org.gestern.gringotts.event.PlayerVaultCreationEvent;
 
 import me.angeschossen.lands.api.LandsIntegration;
+import me.angeschossen.lands.api.exceptions.FlagConflictException;
+import me.angeschossen.lands.api.flags.enums.FlagTarget;
+import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
+import me.angeschossen.lands.api.flags.type.RoleFlag;
+import me.angeschossen.lands.api.land.Area;
 import me.angeschossen.lands.api.land.Land;
 import net.laboulangerie.gringottslands.land.LandAccountHolder;
 import net.laboulangerie.gringottslands.land.LandHolderProvider;
@@ -22,6 +29,7 @@ public class LandsDependency implements Dependency, Listener {
     private final Plugin lands;
     private final String id;
     private final LandsIntegration api;
+    private final RoleFlag gringottsFlag;
 
     /**
      * Instantiates a new Lands dependency.
@@ -37,8 +45,21 @@ public class LandsDependency implements Dependency, Listener {
         this.id = "lands";
 
         this.api = LandsIntegration.of(lands);
+
+        this.gringottsFlag = RoleFlag
+                .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_vault")
+                .setDisplay(true)
+                .setDisplayName("Gringotts Vault")
+                .setDescription("Allow this role to create Gringotts vault for this land.")
+                .setIcon(ItemStack.of(Material.GOLD_INGOT))
+                .setActiveInWar(true)
+                .setAlwaysAllowInWilderness(true)
+                .setApplyInSubareas(true)
+                .setToggleableByNation(false)
+                .setUpdatePredicate(r -> r.getHigherPriorityRole(false, true).equals(r));
+
         this.landHolderProvider = new LandHolderProvider(this.api);
-        
+
     }
 
     /**
@@ -70,6 +91,19 @@ public class LandsDependency implements Dependency, Listener {
         Bukkit.getPluginManager().registerEvents(this.landHolderProvider, Gringotts.instance);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
+
+        this.api.onLoad(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    api.getFlagRegistry().register(gringottsFlag);
+                } catch (FlagConflictException e) {
+                    GringottsLands.LOGGER.info("gringotts_vault role flag already registered.");
+                }                
+            }
+        });
+
+
     }
 
     public void checkLandBalanceConsistency() {
@@ -123,13 +157,17 @@ public class LandsDependency implements Dependency, Listener {
             return;
         }
 
-        AccountHolder owner = this.landHolderProvider.getAccountHolder(land);
-
-        if (LandsConfiguration.CONF.vaultsOnlyInLands && this.api.getArea(event.getCause().getBlock().getLocation()) == null) {
+        Area area = this.api.getArea(event.getCause().getBlock().getLocation());
+        if (LandsConfiguration.CONF.vaultsOnlyInLands && area == null) {
             event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.vaultNotInLand);
             return;
         }
-        
+        area = area == null ? land.getDefaultArea() : area;
+
+        if (!area.hasRoleFlag(player.getUniqueId(), this.gringottsFlag)) {
+            this.gringottsFlag.sendDenied(this.api.getLandPlayer(player.getUniqueId()), area);
+            return;
+        }
 
         if (LandsConfiguration.CONF.maxLandVaults != -1) {
             int vaultsCount = (int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals(land.getULID().toString())).count();
@@ -140,7 +178,7 @@ public class LandsDependency implements Dependency, Listener {
             }
         }
 
-        event.setOwner(owner);
+        event.setOwner(this.landHolderProvider.getAccountHolder(land));
         event.setValid(true);
     }
 }
