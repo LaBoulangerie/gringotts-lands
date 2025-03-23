@@ -50,7 +50,7 @@ public class LandsDependency implements Dependency, Listener {
         this.api = LandsIntegration.of(lands);
 
         this.gringottsFlag = RoleFlag
-                .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_create_vault")
+                .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_vault")
                 .setDisplay(true)
                 .setDisplayName("Gringotts Vault")
                 .setDescription("Allow this role to create Gringotts vault for this land.")
