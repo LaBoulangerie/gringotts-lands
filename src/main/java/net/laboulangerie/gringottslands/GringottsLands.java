@@ -57,7 +57,9 @@ public class GringottsLands extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.landsDependency.checkLandBalanceConsistency();
+        if (this.landsDependency != null) {
+            this.landsDependency.checkLandBalanceConsistency();
+        }
     }
 
     /**
