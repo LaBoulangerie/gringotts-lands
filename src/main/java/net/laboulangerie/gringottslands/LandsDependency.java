@@ -47,7 +47,7 @@ public class LandsDependency implements Dependency, Listener {
         this.api = LandsIntegration.of(lands);
 
         this.gringottsFlag = RoleFlag
-                .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_vault")
+                .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_create_vault")
                 .setDisplay(true)
                 .setDisplayName("Gringotts Vault")
                 .setDescription("Allow this role to create Gringotts vault for this land.")
@@ -55,8 +55,7 @@ public class LandsDependency implements Dependency, Listener {
                 .setActiveInWar(true)
                 .setAlwaysAllowInWilderness(true)
                 .setApplyInSubareas(true)
-                .setToggleableByNation(false)
-                .setUpdatePredicate(r -> r.getHigherPriorityRole(false, true).equals(r));
+                .setToggleableByNation(false);
 
         this.landHolderProvider = new LandHolderProvider(this.api);
 
