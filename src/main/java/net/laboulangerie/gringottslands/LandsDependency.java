@@ -1,5 +1,7 @@
 package net.laboulangerie.gringottslands;
 
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,6 +23,7 @@ import me.angeschossen.lands.api.flags.enums.RoleFlagCategory;
 import me.angeschossen.lands.api.flags.type.RoleFlag;
 import me.angeschossen.lands.api.land.Area;
 import me.angeschossen.lands.api.land.Land;
+import me.angeschossen.lands.api.player.LandPlayer;
 import net.laboulangerie.gringottslands.land.LandAccountHolder;
 import net.laboulangerie.gringottslands.land.LandHolderProvider;
 
@@ -132,22 +135,25 @@ public class LandsDependency implements Dependency, Listener {
             return;
         }
 
-        String line2String = event.getCause().getLine(2);
-
-        if (line2String == null) {
+        if (!event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
             return;
         }
 
         Player player = event.getCause().getPlayer();
-
-        if (!event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
-            return;
-            
-        }
-
         if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
             player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
             return;
+        }
+
+        String line2String = event.getCause().getLine(2);
+        if (line2String == null) {
+            LandPlayer landPlayer = this.api.getLandPlayer(player.getUniqueId());
+            Collection<? extends Land> landPlayerLands = landPlayer.getLands();
+            if (landPlayerLands.size() == 1) {
+                line2String = landPlayerLands.stream().findFirst().get().getName();
+            } else {
+                return;
+            }
         }
 
         Land land = this.api.getLandByName(line2String);
