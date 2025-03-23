@@ -40,7 +40,7 @@ public class GringottsLands extends JavaPlugin {
             Plugin lands = Gringotts.instance.getDependencies()
                     .hookPlugin("Lands", "me.angeschossen.lands.Lands", "7.9.5");
 
-            this.landsDependency = new LandsDependency(lands);
+            this.landsDependency = new LandsDependency(this, lands);
             
             if (lands != null && Gringotts.instance.getDependencies()
                     .registerDependency(this.landsDependency)) {

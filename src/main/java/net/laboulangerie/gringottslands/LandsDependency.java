@@ -29,7 +29,7 @@ import net.laboulangerie.gringottslands.land.LandHolderProvider;
 
 public class LandsDependency implements Dependency, Listener {
     private final LandHolderProvider landHolderProvider;
-    private final Plugin lands;
+    private final GringottsLands main;
     private final String id;
     private final LandsIntegration api;
     private final RoleFlag gringottsFlag;
@@ -39,15 +39,15 @@ public class LandsDependency implements Dependency, Listener {
      *
      * @param lands    the plugin
      */
-    public LandsDependency(Plugin lands) {
+    public LandsDependency(GringottsLands main, Plugin lands) {
         if (lands == null) {
             throw new NullPointerException("'lands' is null");
         }
 
-        this.lands = lands;
-        this.id = "lands";
+        this.api = LandsIntegration.of(main);
 
-        this.api = LandsIntegration.of(lands);
+        this.main = main;
+        this.id = this.main.getName().toLowerCase();
 
         this.gringottsFlag = RoleFlag
                 .of(api, FlagTarget.PLAYER, RoleFlagCategory.ACTION, "gringotts_vault")
@@ -81,7 +81,7 @@ public class LandsDependency implements Dependency, Listener {
      */
     @Override
     public Plugin getPlugin() {
-        return this.lands;
+        return this.main;
     }
 
     /**
@@ -145,21 +145,25 @@ public class LandsDependency implements Dependency, Listener {
             return;
         }
 
+        @SuppressWarnings("deprecation")
         String line2String = event.getCause().getLine(2);
-        if (line2String == null) {
+        Land land;
+        
+        if (line2String != null && !line2String.isBlank()) {
+            land = this.api.getLandByName(line2String);
+            if (land == null) {
+                player.sendMessage(LandsLanguage.LANG.noLandFound);
+                return;
+            }
+        } else {
             LandPlayer landPlayer = this.api.getLandPlayer(player.getUniqueId());
             Collection<? extends Land> landPlayerLands = landPlayer.getLands();
             if (landPlayerLands.size() == 1) {
-                line2String = landPlayerLands.stream().findFirst().get().getName();
+                land = landPlayerLands.stream().findFirst().get();
             } else {
+                player.sendMessage(LandsLanguage.LANG.noLandFound);
                 return;
             }
-        }
-
-        Land land = this.api.getLandByName(line2String);
-        if (land == null) {
-            player.sendMessage(LandsLanguage.LANG.noLandFound);
-            return;
         }
 
         Area area = this.api.getArea(event.getCause().getBlock().getLocation());
