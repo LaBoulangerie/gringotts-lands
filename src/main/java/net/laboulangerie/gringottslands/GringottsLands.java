@@ -29,6 +29,13 @@ public class GringottsLands extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        // load and init configuration
+        saveDefaultConfig(); // saves default configuration if no config.yml exists yet
+        reloadConfig();
+
+        LOGGER = this.getLogger();
+        debugMsg("Plugin debug enabled.");
+
         try {
             Plugin lands = Gringotts.instance.getDependencies()
                     .hookPlugin("Lands", "me.angeschossen.lands.Lands", "7.9.5");
@@ -41,16 +48,12 @@ public class GringottsLands extends JavaPlugin {
             }
         } catch (IllegalArgumentException e) {
             getLogger().warning("Looks like Lands plugin is not compatible with Gringotts");
+            if (LandsConfiguration.CONF.debug) {
+                e.printStackTrace();
+            }
             this.onDisable();
             return;
         }
-
-        // load and init configuration
-        saveDefaultConfig(); // saves default configuration if no config.yml exists yet
-        reloadConfig();
-
-        LOGGER = this.getLogger();
-        debugMsg("Plugin debug enabled.");
 
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }
