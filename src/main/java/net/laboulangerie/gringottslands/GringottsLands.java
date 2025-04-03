@@ -7,6 +7,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.gestern.gringotts.Gringotts;
 import org.gestern.gringotts.api.dependency.Dependency;
 
+import com.palmergames.bukkit.towny.TownyUniverse;
+
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -62,6 +66,13 @@ public class GringottsLands extends JavaPlugin {
     public void onEnable() {
         if (this.landsDependency != null) {
             this.landsDependency.checkLandBalanceConsistency();
+
+            Plugin towny = Gringotts.instance.getDependencies()
+            .hookPlugin("Towny", "com.palmergames.bukkit.towny.Towny", "0.97");
+            if (towny != null) {
+                this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,
+                event -> event.registrar().register("migrate-gringotts-towny", new MigrationCommand(TownyUniverse.getInstance(), this.landsDependency)));
+            }
         }
     }
 

@@ -84,6 +84,14 @@ public class LandsDependency implements Dependency, Listener {
         return this.main;
     }
 
+    public LandsIntegration getLandsApi() {
+        return this.api;
+    }
+
+    public LandHolderProvider getLandHolderProvider() {
+        return this.landHolderProvider;
+    }
+
     /**
      * On enable.
      */
