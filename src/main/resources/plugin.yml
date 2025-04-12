@@ -2,5 +2,12 @@ name: gringotts-lands
 version: ${project.version}
 main: net.laboulangerie.gringottslands.GringottsLands
 api-version: 1.19
-authors: ["Clem", "Grooble"]
+authors: ["Clem", "Grooble", "Grôle"]
 depend: [Lands, Gringotts]
+commands:
+    bal:
+        description: Give balances of the given player or the command sender
+        usage: /bal <player>
+    baltop:
+        description: Give leaderboard of the tax accounts balances 
+        usage: /baltop

@@ -24,7 +24,7 @@ public class TaxAccountHolder implements AccountHolder {
      */
     @Override
     public String getName() {
-        return ACCOUNT_TYPE + "-" + this.player.getName();
+        return this.player.getName();
     }
 
     /**
