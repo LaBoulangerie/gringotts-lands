@@ -103,6 +103,7 @@ public class LandsDependency implements Dependency, Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, Gringotts.instance);
         Bukkit.getPluginManager().registerEvents(this.landHolderProvider, Gringotts.instance);
+        Bukkit.getPluginManager().registerEvents(this.taxHolderProvider, Gringotts.instance);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
         Gringotts.instance.registerAccountHolderProvider(TaxAccountHolder.ACCOUNT_TYPE, this.taxHolderProvider);
