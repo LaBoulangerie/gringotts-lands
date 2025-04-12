@@ -178,6 +178,9 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
             return;
         }
 
+        for (AccountChest chest : account.getVaultChests()) {
+            Gringotts.instance.getDao().deleteAccountChest(chest);
+        }
         Gringotts.instance.getDao().deleteAccount(account);
     }
 
