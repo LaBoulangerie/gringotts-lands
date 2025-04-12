@@ -182,6 +182,8 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
             Gringotts.instance.getDao().deleteAccountChest(chest);
         }
         Gringotts.instance.getDao().deleteAccount(account);
+        // avoid left balance behing transfert to player on land delete
+        event.getLand().setBalance(0);
     }
 
     /**
