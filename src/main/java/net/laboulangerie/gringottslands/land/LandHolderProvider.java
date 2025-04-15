@@ -2,6 +2,7 @@ package net.laboulangerie.gringottslands.land;
 
 import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.applicationframework.util.ULID;
+import me.angeschossen.lands.api.events.ChunkDeleteEvent;
 import me.angeschossen.lands.api.events.LandDeleteEvent;
 import me.angeschossen.lands.api.events.LandRenameEvent;
 import me.angeschossen.lands.api.events.land.bank.LandBankBalanceChangedEvent;
@@ -12,6 +13,7 @@ import me.angeschossen.lands.api.memberholder.MemberHolder;
 import net.laboulangerie.gringottslands.GringottsLands;
 import net.laboulangerie.gringottslands.LandsConfiguration;
 
+import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -179,9 +181,41 @@ public class LandHolderProvider implements AccountHolderProvider, Listener {
         }
 
         for (AccountChest chest : account.getVaultChests()) {
+            chest.sign.setLine(0, "[" + LandsConfiguration.CONF.landSignTypeName + " vault]");
+            chest.sign.update();
             Gringotts.instance.getDao().deleteAccountChest(chest);
         }
         Gringotts.instance.getDao().deleteAccount(account);
+        // avoid left balance behing transfert to player on land delete
+        event.getLand().setBalance(0);
+    }
+
+    /**
+     * Delete land claim.
+     *
+     * @param event the event
+     */
+    @EventHandler
+    public void onLandUnclaim(ChunkDeleteEvent event) {
+        Land land = event.getLand();
+        AccountHolder holder = getAccountHolder(land);
+
+        GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+
+        if (account == null) {
+            return;
+        }
+
+        if (LandsConfiguration.CONF.vaultsOnlyInLands) {
+            for (AccountChest chest : account.getVaultChests()) {
+                Chunk chestChunk = chest.chestLocation().getChunk();
+                if (chestChunk.getX() == event.getX() && chestChunk.getZ() == event.getZ()) {
+                    chest.sign.setLine(0, "[" + LandsConfiguration.CONF.landSignTypeName + " vault]");
+                    chest.sign.update();
+                    Gringotts.instance.getDao().deleteAccountChest(chest);
+                }
+            }
+        }
     }
 
     /**
