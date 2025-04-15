@@ -1,23 +1,40 @@
 package net.laboulangerie.gringottslands;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 
-import io.papermc.paper.command.brigadier.BasicCommand;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
+import org.gestern.gringotts.Gringotts;
+import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 
-public class BalCommand implements BasicCommand {
+import org.jetbrains.annotations.NotNull;
 
+import me.angeschossen.lands.api.LandsIntegration;
+
+import net.laboulangerie.gringottslands.tax.TaxHolderProvider;
+
+public class BalCommand implements CommandExecutor {
     @Override
-    public void execute(CommandSourceStack arg0, String[] arg1) {
-        if(arg1.length == 0) {
-            arg0.getSender().sendMessage(LandsLanguage.LANG.balNoPlayerFound);
-            return;
-        }
-        if(Bukkit.getOfflinePlayer(arg1[0].toString()) == null) {
-            arg0.getSender().sendMessage(LandsLanguage.LANG.balNoPlayerFound);
-            return;
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String alias, @NotNull String[] args) {
+        TaxHolderProvider taxHolderProvider = new TaxHolderProvider(LandsIntegration.of(GringottsLands.instance));
+        
+        if(args.length == 0) {
+            sender.sendMessage(LandsLanguage.LANG.balOfPlayer.replace("%player", sender.getName()));
+            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance() / 100)));
+            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance() / 100)));
+        } else if(Bukkit.getOfflinePlayer(args[0].toString()) == null) {
+            sender.sendMessage(LandsLanguage.LANG.balNoPlayerFound);
+            return false;
+        } else {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(args[0].toString());
+
+            sender.sendMessage(LandsLanguage.LANG.balOfPlayer.replace("%player", player.getName()));
+            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(player)).getBalance() / 100)));
+            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player)).getBalance() / 100)));
         }
 
-
+        return true;
     }
 }

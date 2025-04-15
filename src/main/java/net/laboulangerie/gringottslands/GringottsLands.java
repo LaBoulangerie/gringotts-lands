@@ -59,6 +59,9 @@ public class GringottsLands extends JavaPlugin {
             return;
         }
 
+        getCommand("bal").setExecutor(new BalCommand());
+        getCommand("baltop").setExecutor(new BaltopCommand());
+
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }
 

@@ -6,8 +6,8 @@ authors: ["Clem", "Grooble", "Grôle"]
 depend: [Lands, Gringotts]
 commands:
     bal:
-        description: Give balances of the given player or the command sender
         usage: /bal <player>
+        description: Give balances of the given player or the command sender
     baltop:
-        description: Give leaderboard of the tax accounts balances 
         usage: /baltop
+        description: Give leaderboard of the tax accounts balances 

@@ -14,8 +14,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import org.gestern.gringotts.Gringotts;
+import org.gestern.gringotts.GringottsAccount;
 import org.gestern.gringotts.accountholder.AccountHolder;
 import org.gestern.gringotts.accountholder.AccountHolderProvider;
+import org.gestern.gringotts.accountholder.PlayerAccountHolder;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -102,12 +104,11 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
     public void onPlayerTaxEvent(PlayerTaxEvent event) {
         GringottsLands.debugMsg(event.toString());
 
-        TaxAccountHolder holder = (TaxAccountHolder) this.getAccountHolder(event.getPlayerUUID());
-        double taxAccount = Gringotts.instance.getAccounting().getAccount(holder).getBalance();
-        double playerAccount = event.getPlayerBalance();
+        GringottsAccount taxAccount = Gringotts.instance.getAccounting().getAccount((TaxAccountHolder) this.getAccountHolder(event.getPlayerUUID()));
+        GringottsAccount playerAccount = Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(Bukkit.getOfflinePlayer(event.getPlayerUUID())));
 
-        if (taxAccount - event.getTax() < 1) { // Verify that the player can't pay with his tax vault
-            if(taxAccount + playerAccount - event.getTax() < 1){ // Verify that the player can't pay with his tax vault and personal balance
+        if (taxAccount.getBalance() - event.getTax() * 100 < 1) { // Verify that the player can't pay with his tax vault
+            if(taxAccount.getBalance() + playerAccount.getBalance() - event.getTax() * 100 < 1){ // Verify that the player can't pay with his tax vault and personal balance
                 // Kick the player from the area (if it's the default area it kick him from the land)
                 event.getArea().untrustPlayer(event.getPlayerUUID());
     
@@ -115,17 +116,17 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
 
                 return;
             } else { // Empty the player tax vault and then take the rest form his personal balance
-                Gringotts.instance.getAccounting().getAccount(holder).add((long)-(taxAccount*10));
-                Gringotts.instance.getAccounting().getAccount(this.getAccountHolder(event.getPlayerUUID())).add((long)-((event.getTax()-taxAccount)*10));
+                taxAccount.add((long)-(taxAccount.getBalance() * 100));
+                playerAccount.add((long)-((event.getTax() - taxAccount.getBalance()) * 100));
 
                 event.setCancelled(true);
             }
         } else { // Take the tax from the tax vault
-            Gringotts.instance.getAccounting().getAccount(holder).add((long)-(event.getTax()*10));
+            taxAccount.add((long)-(event.getTax() * 100));
         }
 
         // Give the tax amount to the land's land vault
-        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long) event.getTax()*10);
+        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long) event.getTax() * 100);
 
         event.setCancelled(true);
     }
