@@ -54,7 +54,11 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
     @Override
     public @Nullable AccountHolder getAccountHolder(@NotNull String id) {
         try {
-            return getAccountHolder(UUID.fromString(id));
+            if (id.startsWith(this.getType() + "-")) {
+                return getAccountHolder(UUID.fromString(id.replace(this.getType() + "-", "")));
+            } else {
+                return getAccountHolder(UUID.fromString(id));
+            }
         } catch (IllegalArgumentException e) {
             return null;
         }
