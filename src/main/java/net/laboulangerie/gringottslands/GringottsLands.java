@@ -59,9 +59,6 @@ public class GringottsLands extends JavaPlugin {
             return;
         }
 
-        getCommand("bal").setExecutor(new BalCommand());
-        getCommand("baltop").setExecutor(new BaltopCommand());
-
         Gringotts.instance.getDependencies().getDependency("lands").ifPresent(Dependency::onLoad);
     }
 
@@ -77,6 +74,9 @@ public class GringottsLands extends JavaPlugin {
                 event -> event.registrar().register("migrate-gringotts-towny", new MigrationCommand(TownyUniverse.getInstance(), this.landsDependency)));
             }
         }
+
+        getCommand("bal").setExecutor(new BalCommand());
+        getCommand("baltop").setExecutor(new BaltopCommand());
     }
 
     /**

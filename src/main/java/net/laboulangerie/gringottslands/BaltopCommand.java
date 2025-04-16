@@ -1,7 +1,7 @@
 package net.laboulangerie.gringottslands;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
@@ -23,24 +23,27 @@ public class BaltopCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String alias, @NotNull String[] args) {
         TaxHolderProvider taxHolderProvider = new TaxHolderProvider(LandsIntegration.of(GringottsLands.instance));
-        Set<GringottsAccount> playerAccounts = new HashSet();
+        List<GringottsAccount> playerAccounts = new ArrayList<>();
         Integer rank = 1;
 
         for(OfflinePlayer player : Bukkit.getOfflinePlayers()){ // Get all offline players accounts
-            playerAccounts.add(Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player)));
+            GringottsAccount account = Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player));
+
+            // Ignore players with no balance
+            if(account.getBalance() >= 1) playerAccounts.add(account);
         }
 
         playerAccounts = playerAccounts.stream() // Sort the accounts to get the top 10
                 .sorted((a, b) -> Long.compare(b.getBalance(), a.getBalance()))
                 .limit(10)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
         sender.sendMessage(LandsLanguage.LANG.baltopIntro);
         for(GringottsAccount playerAccount : playerAccounts){
             sender.sendMessage(LandsLanguage.LANG.baltopPlayer
                 .replace("%rank", rank.toString())
                 .replace("%player", playerAccount.owner.getName())
-                .replace("%balance", "" + (playerAccount.getBalance() / 100)));
+                .replace("%balance", "" + (playerAccount.getBalance())));
             rank++;
         }
 

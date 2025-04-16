@@ -107,8 +107,8 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
         GringottsAccount taxAccount = Gringotts.instance.getAccounting().getAccount((TaxAccountHolder) this.getAccountHolder(event.getPlayerUUID()));
         GringottsAccount playerAccount = Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(Bukkit.getOfflinePlayer(event.getPlayerUUID())));
 
-        if (taxAccount.getBalance() - event.getTax() * 100 < 1) { // Verify that the player can't pay with his tax vault
-            if(taxAccount.getBalance() + playerAccount.getBalance() - event.getTax() * 100 < 1){ // Verify that the player can't pay with his tax vault and personal balance
+        if (taxAccount.getBalance() - event.getTax() < 1) { // Verify that the player can't pay with his tax vault
+            if(taxAccount.getBalance() + playerAccount.getBalance() - event.getTax() < 1){ // Verify that the player can't pay with his tax vault and personal balance
                 // Kick the player from the area (if it's the default area it kick him from the land)
                 event.getArea().untrustPlayer(event.getPlayerUUID());
     
@@ -116,17 +116,17 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
 
                 return;
             } else { // Empty the player tax vault and then take the rest form his personal balance
-                taxAccount.add((long)-(taxAccount.getBalance() * 100));
-                playerAccount.add((long)-((event.getTax() - taxAccount.getBalance()) * 100));
+                taxAccount.add((long)-(taxAccount.getBalance()));
+                playerAccount.add((long)-((event.getTax() - taxAccount.getBalance())));
 
                 event.setCancelled(true);
             }
         } else { // Take the tax from the tax vault
-            taxAccount.add((long)-(event.getTax() * 100));
+            taxAccount.add((long)-(event.getTax()));
         }
 
         // Give the tax amount to the land's land vault
-        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long) event.getTax() * 100);
+        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long) event.getTax());
 
         event.setCancelled(true);
     }

@@ -22,8 +22,8 @@ public class BalCommand implements CommandExecutor {
         
         if(args.length == 0) {
             sender.sendMessage(LandsLanguage.LANG.balOfPlayer.replace("%player", sender.getName()));
-            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance() / 100)));
-            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance() / 100)));
+            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance())));
+            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(Bukkit.getOfflinePlayer(sender.getName()))).getBalance())));
         } else if(Bukkit.getOfflinePlayer(args[0].toString()) == null) {
             sender.sendMessage(LandsLanguage.LANG.balNoPlayerFound);
             return false;
@@ -31,9 +31,10 @@ public class BalCommand implements CommandExecutor {
             OfflinePlayer player = Bukkit.getOfflinePlayer(args[0].toString());
 
             sender.sendMessage(LandsLanguage.LANG.balOfPlayer.replace("%player", player.getName()));
-            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(player)).getBalance() / 100)));
-            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player)).getBalance() / 100)));
+            sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(player)).getBalance())));
+            sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player)).getBalance())));
         }
+        sender.sendMessage("test");
 
         return true;
     }
