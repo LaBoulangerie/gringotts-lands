@@ -34,7 +34,6 @@ public class BalCommand implements CommandExecutor {
             sender.sendMessage(LandsLanguage.LANG.perBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(new PlayerAccountHolder(player)).getBalance())));
             sender.sendMessage(LandsLanguage.LANG.taxBalOfPlayer.replace("%balance", "" + (Gringotts.instance.getAccounting().getAccount(taxHolderProvider.getAccountHolder(player)).getBalance())));
         }
-        sender.sendMessage("test");
 
         return true;
     }
