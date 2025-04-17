@@ -199,7 +199,7 @@ public class LandsDependency implements Dependency, Listener {
                 }
                 
                 if (LandsConfiguration.CONF.maxLandVaults != -1 && (vaultsCount + 1) > vaultsMax) {
-                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults);
+                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults.replace("%max", ((Integer)vaultsMax).toString()));
                     return;
                 }
             }
@@ -233,7 +233,7 @@ public class LandsDependency implements Dependency, Listener {
                 int vaultsMax = LandsConfiguration.CONF.maxPlayerVaults;
                 
                 if (LandsConfiguration.CONF.maxPlayerVaults != -1 && (vaultsCount + 1) > vaultsMax) {
-                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults);
+                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults.replace("%max", ((Integer)vaultsMax).toString()));
                     return;
                 }
             }
