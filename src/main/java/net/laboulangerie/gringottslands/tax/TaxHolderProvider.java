@@ -120,17 +120,17 @@ public class TaxHolderProvider implements AccountHolderProvider, Listener {
 
                 return;
             } else { // Empty the player tax vault and then take the rest form his personal balance
-                taxAccount.add((long)-(taxAccount.getBalance()));
-                playerAccount.add((long)-((event.getTax() - taxAccount.getBalance())));
+                taxAccount.remove((long)taxAccount.getBalance());
+                playerAccount.remove((long)(event.getTax() + taxAccount.getBalance()));
 
                 event.setCancelled(true);
             }
         } else { // Take the tax from the tax vault
-            taxAccount.add((long)-(event.getTax()));
+            taxAccount.remove((long)event.getTax());
         }
 
         // Give the tax amount to the land's land vault
-        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long) event.getTax());
+        Gringotts.instance.getAccounting().getAccount((LandAccountHolder) new LandHolderProvider(api).getAccountHolder(event.getArea().getLand().getULID())).add((long)event.getTax());
 
         event.setCancelled(true);
     }
