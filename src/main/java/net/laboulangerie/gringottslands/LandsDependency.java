@@ -222,11 +222,6 @@ public class LandsDependency implements Dependency, Listener {
                 return;
             }
     
-            if (!area.hasRoleFlag(player.getUniqueId(), this.gringottsFlag)) {
-                this.gringottsFlag.sendDenied(this.api.getLandPlayer(player.getUniqueId()), area);
-                return;
-            }
-    
             if (LandsConfiguration.CONF.maxPlayerVaults != -1) {
                 int vaultsCount = (int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals("tax-" + player.getUniqueId())).count();
     
