@@ -26,9 +26,12 @@ import me.angeschossen.lands.api.land.Land;
 import me.angeschossen.lands.api.player.LandPlayer;
 import net.laboulangerie.gringottslands.land.LandAccountHolder;
 import net.laboulangerie.gringottslands.land.LandHolderProvider;
+import net.laboulangerie.gringottslands.tax.TaxAccountHolder;
+import net.laboulangerie.gringottslands.tax.TaxHolderProvider;
 
 public class LandsDependency implements Dependency, Listener {
     private final LandHolderProvider landHolderProvider;
+    private final TaxHolderProvider taxHolderProvider;
     private final GringottsLands main;
     private final String id;
     private final LandsIntegration api;
@@ -61,6 +64,7 @@ public class LandsDependency implements Dependency, Listener {
                 .setToggleableByNation(false);
 
         this.landHolderProvider = new LandHolderProvider(this.api);
+        this.taxHolderProvider = new TaxHolderProvider(this.api);
 
     }
 
@@ -99,8 +103,10 @@ public class LandsDependency implements Dependency, Listener {
     public void onEnable() {
         Bukkit.getPluginManager().registerEvents(this, Gringotts.instance);
         Bukkit.getPluginManager().registerEvents(this.landHolderProvider, Gringotts.instance);
+        Bukkit.getPluginManager().registerEvents(this.taxHolderProvider, Gringotts.instance);
 
         Gringotts.instance.registerAccountHolderProvider(LandAccountHolder.ACCOUNT_TYPE, this.landHolderProvider);
+        Gringotts.instance.registerAccountHolderProvider(TaxAccountHolder.ACCOUNT_TYPE, this.taxHolderProvider);
 
         this.api.onLoad(new Runnable() {
             @Override
@@ -143,64 +149,94 @@ public class LandsDependency implements Dependency, Listener {
             return;
         }
 
-        if (!event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
-            return;
-        }
+        if (event.getType().equals(LandsConfiguration.CONF.landSignTypeName)) {
+            Player player = event.getCause().getPlayer();
 
-        Player player = event.getCause().getPlayer();
-        if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
-            player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
-            return;
-        }
-
-        @SuppressWarnings("deprecation")
-        String line2String = event.getCause().getLine(2);
-        Land land;
-        
-        if (line2String != null && !line2String.isBlank()) {
-            land = this.api.getLandByName(line2String);
-            if (land == null) {
-                player.sendMessage(LandsLanguage.LANG.noLandFound);
+            if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
+                player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
                 return;
             }
-        } else {
-            LandPlayer landPlayer = this.api.getLandPlayer(player.getUniqueId());
-            Collection<? extends Land> landPlayerLands = landPlayer.getLands();
-            if (landPlayerLands.size() == 1) {
-                land = landPlayerLands.stream().findFirst().get();
-            } else {
-                player.sendMessage(LandsLanguage.LANG.noLandFound);
-                return;
-            }
-        }
-
-        Area area = this.api.getArea(event.getCause().getBlock().getLocation());
-        if (LandsConfiguration.CONF.vaultsOnlyInLands && area == null) {
-            event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.vaultNotInLand);
-            return;
-        }
-        area = area == null ? land.getDefaultArea() : area;
-
-        if (!area.hasRoleFlag(player.getUniqueId(), this.gringottsFlag)) {
-            this.gringottsFlag.sendDenied(this.api.getLandPlayer(player.getUniqueId()), area);
-            return;
-        }
-
-        if (LandsConfiguration.CONF.maxLandVaults != -1) {
-            int vaultsCount = (int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals(land.getULID().toString())).count();
-
-            int vaultsMax = LandsConfiguration.CONF.maxLandVaults;
-            if (land.getNation() != null && land.getNation().getCapital().equals(land)) {
-                vaultsMax += Math.max(LandsConfiguration.CONF.maxCapitalLandVaultsAdditional, 0);
-            }
+    
+            @SuppressWarnings("deprecation")
+            String line2String = event.getCause().getLine(2);
+            Land land;
             
-            if (LandsConfiguration.CONF.maxLandVaults != -1 && (vaultsCount + 1) > vaultsMax) {
-                event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults);
+            if (line2String != null && !line2String.isBlank()) {
+                land = this.api.getLandByName(line2String);
+                if (land == null) {
+                    player.sendMessage(LandsLanguage.LANG.noLandFound);
+                    return;
+                }
+            } else {
+                LandPlayer landPlayer = this.api.getLandPlayer(player.getUniqueId());
+                Collection<? extends Land> landPlayerLands = landPlayer.getLands();
+                if (landPlayerLands.size() == 1) {
+                    land = landPlayerLands.stream().findFirst().get();
+                } else {
+                    player.sendMessage(LandsLanguage.LANG.noLandFound);
+                    return;
+                }
+            }
+    
+            Area area = this.api.getArea(event.getCause().getBlock().getLocation());
+            if (LandsConfiguration.CONF.vaultsOnlyInLands && area == null) {
+                event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.vaultNotInLand);
                 return;
             }
+            area = area == null ? land.getDefaultArea() : area;
+    
+            if (!area.hasRoleFlag(player.getUniqueId(), this.gringottsFlag)) {
+                this.gringottsFlag.sendDenied(this.api.getLandPlayer(player.getUniqueId()), area);
+                return;
+            }
+    
+            if (LandsConfiguration.CONF.maxLandVaults != -1) {
+                int vaultsCount = (int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals(land.getULID().toString())).count();
+    
+                int vaultsMax = LandsConfiguration.CONF.maxLandVaults;
+                if (land.getNation() != null && land.getNation().getCapital().equals(land)) {
+                    vaultsMax += Math.max(LandsConfiguration.CONF.maxCapitalLandVaultsAdditional, 0);
+                }
+                
+                if (LandsConfiguration.CONF.maxLandVaults != -1 && (vaultsCount + 1) > vaultsMax) {
+                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults.replace("%max", ((Integer)vaultsMax).toString()));
+                    return;
+                }
+            }
+    
+            event.setOwner(this.landHolderProvider.getAccountHolder(land));
+            event.setValid(true);
         }
 
-        event.setOwner(this.landHolderProvider.getAccountHolder(land));
-        event.setValid(true);
+        if (event.getType().equals(LandsConfiguration.CONF.taxSignTypeName)) {
+            Player player = event.getCause().getPlayer();
+            
+            if (!LandsPermissions.CREATE_VAULT_LAND.isAllowed(player)) {
+                player.sendMessage(LandsLanguage.LANG.noLandVaultPerm);
+                return;
+            }
+    
+            Area area = this.api.getArea(event.getCause().getBlock().getLocation());
+            if (LandsConfiguration.CONF.vaultsOnlyInLands && area == null) {
+                event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.vaultNotInLand);
+                return;
+            }
+    
+            if (LandsConfiguration.CONF.maxPlayerVaults != -1) {
+                int vaultsCount = (int) Gringotts.instance.getDao().retrieveChests().stream().filter(c -> c.account.owner.getId().equals("tax-" + player.getUniqueId())).count();
+    
+                int vaultsMax = LandsConfiguration.CONF.maxPlayerVaults;
+                
+                if (LandsConfiguration.CONF.maxPlayerVaults != -1 && (vaultsCount + 1) > vaultsMax) {
+                    event.getCause().getPlayer().sendMessage(LandsLanguage.LANG.tooManyVaults.replace("%max", ((Integer)vaultsMax).toString()));
+                    return;
+                }
+            }
+    
+            event.setOwner(this.taxHolderProvider.getAccountHolder(player));
+            event.setValid(true);
+        }
+
+        
     }
 }

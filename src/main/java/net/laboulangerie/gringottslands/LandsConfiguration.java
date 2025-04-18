@@ -12,8 +12,10 @@ public enum LandsConfiguration {
      */
     public String language = "custom";
     public String landSignTypeName = "land";
+    public String taxSignTypeName = "tax";
 
     public int maxLandVaults = -1;
+    public int maxPlayerVaults = -1;
     public int maxCapitalLandVaultsAdditional = 0;
 
     public boolean vaultsOnlyInLands = false;
@@ -24,7 +26,9 @@ public enum LandsConfiguration {
     public void readConfig(FileConfiguration savedConfig) {
         CONF.language = savedConfig.getString("language", "custom");
         CONF.landSignTypeName = savedConfig.getString("land_sign_type_name", "land");
+        CONF.taxSignTypeName = savedConfig.getString("tax_sign_type_name", "tax");
         CONF.maxLandVaults = savedConfig.getInt("max_land_vaults", -1);
+        CONF.maxPlayerVaults = savedConfig.getInt("max_player_vaults", -1);
         CONF.maxCapitalLandVaultsAdditional = savedConfig.getInt("max_capital_land_vaults_additional", 0);
         CONF.vaultsOnlyInLands = savedConfig.getBoolean("vaults_only_in_lands", false);
         CONF.landStartBalance = savedConfig.getLong("land_start_balance", 0);
