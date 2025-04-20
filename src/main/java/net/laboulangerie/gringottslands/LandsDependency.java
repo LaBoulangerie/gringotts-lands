@@ -126,13 +126,19 @@ public class LandsDependency implements Dependency, Listener {
         // Check gringotts/lands balance consistency
         for (Land land : this.api.getLands()) {
             GringottsLands.debugMsg("Check Land " + land.getULID() + " balance consistency.");
-            AccountHolder holder = this.landHolderProvider.getAccountHolder(land);
-            GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
-            double landBalance = land.getBalance();
-            double balance = Configuration.CONF.getCurrency().getDisplayValue(account.getBalance());
-            if (landBalance != balance) {
-                GringottsLands.LOGGER.severe("Update Land " + land.getULID() + " balance to resolve inconsistency. (current: " + landBalance + " gringotts: " + balance + ")" );
-                land.setBalance(balance);
+            try {
+                AccountHolder holder = this.landHolderProvider.getAccountHolder(land);
+                GringottsAccount account = Gringotts.instance.getAccounting().getAccount(holder);
+                double landBalance = land.getBalance();
+                double balance = Configuration.CONF.getCurrency().getDisplayValue(account.getBalance());
+                if (landBalance != balance) {
+                    GringottsLands.LOGGER.severe("Update Land " + land.getULID() + " balance to resolve inconsistency. (current: " + landBalance + " gringotts: " + balance + ")" );
+                    land.setBalance(balance);
+                }
+            } catch (Exception e) {
+                // timeout exception on world on load
+                GringottsLands.LOGGER.severe("Error checking Land " + land.getULID() + " balance consistency.");
+                e.printStackTrace();
             }
         }
     }
